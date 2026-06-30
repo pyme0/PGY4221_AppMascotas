@@ -22,6 +22,16 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    // El plugin @capacitor/camera trae androidx.core:core-ktx:1.17.0 hardcodeado,
+    // que exige Android Gradle Plugin 8.9.1+. Este proyecto usa AGP 8.7.2, asi que
+    // fijamos androidx.core a 1.15.0 (la version del scaffold, compatible con AGP 8.7.2).
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.core:core:1.15.0'
+            force 'androidx.core:core-ktx:1.15.0'
+        }
+    }
 }
 
 task clean(type: Delete) {
