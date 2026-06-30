@@ -42,40 +42,25 @@ export class AuthService {
   }
 
   /**
-   * Valida contra el storage. Si las credenciales son correctas,
-   * persiste la sesión y actualiza el BehaviorSubject.
+   * Valida las credenciales. En el dispositivo (SQLite disponible)
+   * consulta la tabla `usuario` de SQLite; en el navegador usa Ionic
+   * Storage. La sesión se guarda siempre en Storage.
    */
   public async login(nombre: string, password: string): Promise<boolean> {
-    const usuarios = await this.storageService.obtenerUsuarios();
-    const encontrado = usuarios.find(u => u.nombre === nombre && u.password === password);
-    if (encontrado) {
-      await this.storageService.iniciarSesion(encontrado.nombre);
-      this.usuarioSubject.next({ nombre: encontrado.nombre });
-      console.log('AuthService: login correcto para', encontrado.nombre);
+    let valido: boolean;
+    if (this.dbTaskService.estaLista()) {
+      valido = await this.dbTaskService.validarUsuario(nombre, password);
+    } else {
+      const usuarios = await this.storageService.obtenerUsuarios();
+      valido = usuarios.some(u => u.nombre === nombre && u.password === password);
+    }
+    if (valido) {
+      await this.storageService.iniciarSesion(nombre);
+      this.usuarioSubject.next({ nombre });
+      console.log('AuthService: login correcto para', nombre);
       return true;
     }
     console.warn('AuthService: intento de login fallido para', nombre);
-    return false;
-  }
-
-  /**
-   * Valida las credenciales contra la tabla `usuario` de SQLite. Solo
-   * funciona en dispositivo/emulador; en web la BD no está lista y se
-   * lanza el error 'SQLITE_NO_DISPONIBLE' para que la UI avise. La
-   * sesión se persiste en Storage (igual que en el flujo del profesor).
-   */
-  public async loginConSQLite(nombre: string, password: string): Promise<boolean> {
-    if (!this.dbTaskService.estaLista()) {
-      throw new Error('SQLITE_NO_DISPONIBLE');
-    }
-    const ok = await this.dbTaskService.validarUsuario(nombre, password);
-    if (ok) {
-      await this.storageService.iniciarSesion(nombre);
-      this.usuarioSubject.next({ nombre });
-      console.log('AuthService: login con SQLite correcto para', nombre);
-      return true;
-    }
-    console.warn('AuthService: login con SQLite fallido para', nombre);
     return false;
   }
 
