@@ -27,7 +27,7 @@ export class HomePage implements OnInit {
   public cargando = true;
   public cargandoDesdeCache = true;
   public cargandoDesdeApi = false;
-  public readonly categorias: string[] = ['Todos', 'Perros', 'Gatos', 'Accesorios', 'Alimentos'];
+  public readonly categorias: string[] = ['Todos', 'Perros'];
   public categoriaSeleccionada: string = 'Todos';
 
   constructor(

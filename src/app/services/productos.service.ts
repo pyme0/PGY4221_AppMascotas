@@ -1,78 +1,63 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, catchError } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of, firstValueFrom } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 import { Producto } from '../models/producto.model';
 import { StorageService } from './storage.service';
 
 /**
- * Servicio de productos / catálogo.
+ * Servicio de catálogo (perros disponibles en Canem).
  *
- * Implementa el patrón "cache + API" mencionado en el enunciado:
- *   1. Intenta leer la caché local (Ionic Storage) para mostrar
- *      información de inmediato (funciona offline).
- *   2. Consume la API para refrescar el catálogo.
- *   3. Si la API falla (404, sin internet, etc.), el cache ya está
- *      disponible como fallback robusto.
- *
- * API fuente: jsonplaceholder.typicode.com (posts) cruzada con
- * imágenes de Dog CEO (dog.ceo) para construir un catálogo
- * coherente con la temática de Canem.
+ * Consume la API pública Dog CEO, que devuelve URLs de imágenes reales.
+ * Cada URL trae la raza en la ruta (.../breeds/<raza>/...), que se usa
+ * como nombre del producto. Implementa el patrón cache + API:
+ *   1. Se muestra primero lo guardado en cache (funciona sin internet).
+ *   2. Se consulta la API y se actualiza el cache.
  */
 @Injectable({ providedIn: 'root' })
 export class ProductosService {
-  /** Endpoint principal: lista "plana" de la API mock. */
-  private readonly API_POSTS = 'https://jsonplaceholder.typicode.com/posts';
-  /** Endpoint de imágenes por raza (se reutiliza varias veces). */
-  private readonly API_PERRO = 'https://dog.ceo/api/breed/husky/images/random';
+  /** Cantidad de perros que se muestran en el catálogo. */
+  private readonly CANTIDAD = 6;
 
-  /** Categorías que se asignan en orden a los 12 primeros productos. */
-  private readonly CATEGORIAS = ['Perros', 'Gatos', 'Accesorios', 'Alimentos'];
+  /** API pública de imágenes de perros. */
+  private readonly API_PERROS = `https://dog.ceo/api/breeds/image/random/${this.CANTIDAD}`;
 
   constructor(
     private readonly http: HttpClient,
     private readonly storageService: StorageService
   ) {}
 
-  /**
-   * Devuelve siempre el cache local, sin red. Útil como ruta
-   * inmediata mientras se hace el fetch a la API.
-   */
+  /** Devuelve el catálogo guardado en cache (para mostrar sin internet). */
   public async obtenerDesdeCache(): Promise<Producto[]> {
     return this.storageService.obtenerCacheProductos<Producto>();
   }
 
   /**
-   * Realiza la consulta HTTP y mapea cada item a Producto.
-   * Si la operación falla, devuelve el cache como fallback y, en
-   * última instancia, un array vacío.
+   * Consume la API y arma el catálogo. Si la red falla, devuelve un
+   * arreglo vacío y el cache se usa como respaldo.
    */
   public cargarProductos(): Observable<Producto[]> {
-    return this.http.get<Array<{ userId: number; id: number; title: string; body: string }>>(this.API_POSTS).pipe(
-      map(posts => posts.slice(0, 12).map((p, idx) => this.construirProducto(p, idx))),
-      // Si la red falla, intenta con cache. Útil para el escenario "404
-      // sin internet" descrito en la rúbrica.
+    return this.http.get<{ message: string[]; status: string }>(this.API_PERROS).pipe(
+      map(respuesta => respuesta.message.map((url, i) => this.construirProducto(url, i))),
       catchError(err => {
-        console.warn('ProductosService: error al consumir la API, se usa cache:', err?.status ?? err);
+        console.warn('ProductosService: error al consumir la API:', err?.status ?? err);
         return of([] as Producto[]);
       })
     );
   }
 
   /**
-   * Carga la API y, si la respuesta trae al menos un elemento,
-   * actualiza el cache local para que esté disponible offline.
-   * Devuelve siempre el listado efectivo que debe mostrarse.
+   * Carga desde la API y, si hay datos, los guarda en cache. Devuelve el
+   * listado a mostrar (el cache si la API falla).
    */
   public async cargarYCachear(): Promise<Producto[]> {
     try {
-      const productos = await this.cargarProductos().toPromise();
-      if (productos && productos.length > 0) {
+      const productos = await firstValueFrom(this.cargarProductos());
+      if (productos.length > 0) {
         await this.storageService.guardarCacheProductos(productos);
         return productos;
       }
-      // Si llegó array vacío es porque hubo error → devolvemos cache
       return await this.obtenerDesdeCache();
     } catch (err) {
       console.error('ProductosService: error inesperado:', err);
@@ -80,35 +65,27 @@ export class ProductosService {
     }
   }
 
-  /** Convierte un post de jsonplaceholder en un Producto de mascota. */
-  private construirProducto(
-    p: { id: number; title: string; body: string },
-    index: number
-  ): Producto {
-    const categoria = this.CATEGORIAS[index % this.CATEGORIAS.length];
+  /** Construye un Producto a partir de una URL de imagen de Dog CEO. */
+  private construirProducto(url: string, indice: number): Producto {
+    const raza = this.razaDesdeUrl(url);
     return {
-      id: p.id,
-      titulo: this.capitalizar(p.title.split(' ').slice(0, 4).join(' ')),
-      descripcion: this.capitalizar(p.body.split('.').slice(0, 1).join(' ').slice(0, 110)),
-      // Una sola URL estable por id, evitando aleatoriedad en el catálogo.
-      imagen: `https://dog.ceo/api/img/husky/${this.toDogImageIndex(p.id)}.jpg`,
-      precio: 10000 + (p.id * 1990) % 80000,
-      categoria
+      id: indice + 1,
+      titulo: raza,
+      descripcion: `Perro de raza ${raza}, disponible en Canem.`,
+      imagen: url,
+      precio: 90000 + indice * 25000,
+      categoria: 'Perros',
     };
   }
 
-  /** Capitaliza la primera letra y limpia espacios sobrantes. */
-  private capitalizar(texto: string): string {
-    if (!texto) return '';
-    return texto.trim().charAt(0).toUpperCase() + texto.trim().slice(1);
-  }
-
-  /**
-   * Convierte un id numérico a un nombre de archivo de perro válido.
-   * Las imágenes de Dog CEO siguen el patrón `n02091459_*.jpg`.
-   */
-  private toDogImageIndex(id: number): number {
-    const base = 1000;
-    return base + (id % 89);
+  /** Extrae y formatea la raza desde la URL (.../breeds/<raza>/...). */
+  private razaDesdeUrl(url: string): string {
+    const parte = url.split('/breeds/')[1] || '';
+    const slug = parte.split('/')[0] || 'perro';
+    return slug
+      .split('-')
+      .reverse()
+      .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(' ');
   }
 }
