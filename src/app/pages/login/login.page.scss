@@ -1,67 +1,16 @@
-.login-content {
-  --background: linear-gradient(180deg, #fff5f5 0%, #ffe5e5 100%);
-}
+/* Estilos basicos del login */
 
 .logo-container {
   text-align: center;
-  margin-top: 32px;
-  margin-bottom: 32px;
-
-  .logo-circle {
-    width: 92px;
-    height: 92px;
-    margin: 0 auto 16px;
-    background: linear-gradient(135deg, #eb445a 0%, #f04141 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    box-shadow: 0 8px 24px rgba(235, 68, 90, 0.35);
-  }
-
-  h1 {
-    font-size: 26px;
-    font-weight: 700;
-    color: #222;
-    margin: 8px 0 4px;
-  }
-
-  .subtitulo {
-    color: #666;
-    font-size: 14px;
-    margin: 0;
-  }
-}
-
-.login-form {
-  max-width: 480px;
-  margin: 0 auto;
+  margin: 20px 0;
 }
 
 .mensaje-error {
-  color: #f04141;
-  font-size: 14px;
+  color: red;
   text-align: center;
-  margin: 12px 0;
-
-  ion-icon {
-    vertical-align: middle;
-    margin-right: 4px;
-  }
 }
 
 .ayuda {
   text-align: center;
-  margin-top: 28px;
-  font-size: 13px;
-  color: #555;
-
-  code {
-    background: #fff;
-    padding: 4px 8px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    font-size: 12px;
-  }
+  margin-top: 20px;
 }

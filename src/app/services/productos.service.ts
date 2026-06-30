@@ -18,7 +18,7 @@ import { StorageService } from './storage.service';
  *
  * API fuente: jsonplaceholder.typicode.com (posts) cruzada con
  * imágenes de Dog CEO (dog.ceo) para construir un catálogo
- * coherente con la temática de la tienda de mascotas.
+ * coherente con la temática de Canem.
  */
 @Injectable({ providedIn: 'root' })
 export class ProductosService {

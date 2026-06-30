@@ -1,4 +1,4 @@
-# 🐾 Tienda de Mascotas
+# Canem
 
 > Sumativa 2 — Experiencia de Aprendizaje 2
 > **Asignatura:** Programación Aplicaciones Móviles (PGY4221)
@@ -148,7 +148,7 @@ esperado: SQLite es nativo).
 
 ## 📷 Datos de contexto (motivación)
 
-El catálogo se trabajó en torno a la **Tienda de Mascotas** porque:
+El catálogo se trabajó en torno a **Canem** porque:
 
 - Es un tema con el que la mayoría del curso trabajó continuidad
   desde la Sumativa 1 (Experiencia 1).
