@@ -28,26 +28,7 @@
 
 <ion-content [fullscreen]="true">
 
-  <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
-    <ion-refresher-content
-      pullingIcon="chevron-down-circle-outline"
-      pullingText="Desliza para refrescar"
-      refreshingSpinner="circles"
-      refreshingText="Actualizando catálogo...">
-    </ion-refresher-content>
-  </ion-refresher>
-
   <ng-container *ngIf="!cargando; else cargandoTpl">
-
-    <div class="estado-linea" *ngIf="cargandoDesdeApi">
-      <ion-spinner name="dots"></ion-spinner>
-      <span>Sincronizando con el servidor...</span>
-    </div>
-
-    <div class="estado-linea cache" *ngIf="cargandoDesdeCache">
-      <ion-icon name="cloud-offline-outline"></ion-icon>
-      <span>Cargando desde cache local</span>
-    </div>
 
     <ng-container *ngIf="productosFiltrados.length > 0; else vacioTpl">
 

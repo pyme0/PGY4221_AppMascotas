@@ -25,8 +25,6 @@ import { StorageService } from '../../services/storage.service';
 export class HomePage implements OnInit {
   public productos: Producto[] = [];
   public cargando = true;
-  public cargandoDesdeCache = true;
-  public cargandoDesdeApi = false;
   public readonly categorias: string[] = ['Todos', 'Perros'];
   public categoriaSeleccionada: string = 'Todos';
 
@@ -38,34 +36,26 @@ export class HomePage implements OnInit {
   ) {}
 
   public async ngOnInit(): Promise<void> {
-    await this.cargarInicial();
-  }
-
-  /**
-   * Carga la información en dos niveles: primero lo cacheado, luego la API.
-   * La UI queda "ocupada" solo mientras ninguna fuente haya respondido.
-   */
-  private async cargarInicial(): Promise<void> {
-    this.cargando = true;
-    this.cargandoDesdeCache = true;
+    // Primero mostramos lo guardado en cache (funciona sin internet).
     this.productos = await this.productosService.obtenerDesdeCache();
-    this.cargandoDesdeCache = false;
-    this.cargando = this.productos.length === 0;
-    console.log('HomePage: productos cargados desde cache:', this.productos.length);
+    if (this.productos.length > 0) {
+      this.cargando = false;
+    }
 
-    this.cargandoDesdeApi = true;
-    const desdeApi = await this.productosService.cargarYCachear();
-    this.cargandoDesdeApi = false;
-    this.productos = desdeApi.length > 0 ? desdeApi : this.productos;
-    this.cargando = false;
-    console.log('HomePage: productos finales en pantalla:', this.productos.length);
-  }
-
-  /** Refresca el catálogo haciendo solo pull-to-refresh (reutiliza cache). */
-  public async refrescar(evento: any): Promise<void> {
-    await this.productosService.cargarYCachear().then(async lista => {
-      if (lista.length > 0) this.productos = lista;
-      evento?.target?.complete();
+    // Luego consumimos la API con .subscribe y actualizamos el catálogo.
+    this.productosService.cargarProductos().subscribe({
+      next: async (lista) => {
+        if (lista.length > 0) {
+          this.productos = lista;
+          await this.storageService.guardarCacheProductos(lista);
+        }
+        this.cargando = false;
+        console.log('HomePage: productos en pantalla:', this.productos.length);
+      },
+      error: (err) => {
+        console.error('HomePage: error al cargar productos:', err);
+        this.cargando = false;
+      },
     });
   }
 

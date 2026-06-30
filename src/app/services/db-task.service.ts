@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SQLite, SQLiteObject } from '@awesome-cordova-plugins/sqlite/ngx';
 import { Platform, ToastController } from '@ionic/angular';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { Usuario } from '../models/usuario.model';
 
@@ -96,16 +96,6 @@ export class DbTaskService {
     }
   }
 
-  /** Observable del estado de la BD (lista o no). */
-  dbState(): Observable<boolean> {
-    return this.isDbReady.asObservable();
-  }
-
-  /** Observable con la lista de usuarios. */
-  fetchUsuarios(): Observable<Usuario[]> {
-    return this.usuarios.asObservable();
-  }
-
   // ============================================================
   //  CONSULTAS (queries SQL)
   // ============================================================
@@ -133,15 +123,6 @@ export class DbTaskService {
       [nombre, password]
     );
     return res.rows.length > 0;
-  }
-
-  /** Registra un nuevo usuario (INSERT) y refresca la lista. */
-  async agregarUsuario(nombre: string, password: string): Promise<void> {
-    await this.database.executeSql(
-      'INSERT INTO usuario(nombre, password) VALUES (?, ?)',
-      [nombre, password]
-    );
-    await this.cargarUsuarios();
   }
 
   /** True si la base de datos nativa ya quedó inicializada. */
