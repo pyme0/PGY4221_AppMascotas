@@ -1,0 +1,21 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Error 404</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="error-container">
+    <div class="numero">404</div>
+    <ion-icon name="paw-outline" size="large"></ion-icon>
+    <h1>¡Ups! Página no encontrada</h1>
+    <p>La mascota que buscas se escapó. La ruta solicitada no existe.</p>
+    <ion-button expand="block" color="primary" (click)="irAlInicio()">
+      <ion-icon name="home" slot="start"></ion-icon>
+      Volver al inicio
+    </ion-button>
+  </div>
+</ion-content>

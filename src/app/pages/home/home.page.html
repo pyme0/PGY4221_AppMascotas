@@ -1,0 +1,115 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button routerLink="/perfil">
+        <ion-icon slot="icon-only" name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Hola, {{ nombreUsuario }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrarSesion()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar color="primary">
+    <ion-segment
+      scrollable
+      [(ngModel)]="categoriaSeleccionada"
+      (ionChange)="cambiarCategoria($any($event).detail.value)"
+      class="segmento-categorias">
+      <ion-segment-button *ngFor="let cat of categorias" [value]="cat">
+        <ion-label>{{ cat }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <ion-refresher slot="fixed" (ionRefresh)="refrescar($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="Desliza para refrescar"
+      refreshingSpinner="circles"
+      refreshingText="Actualizando catálogo...">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <ng-container *ngIf="!cargando; else cargandoTpl">
+
+    <div class="estado-linea" *ngIf="cargandoDesdeApi">
+      <ion-spinner name="dots"></ion-spinner>
+      <span>Sincronizando con el servidor...</span>
+    </div>
+
+    <div class="estado-linea cache" *ngIf="cargandoDesdeCache">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>Cargando desde cache local</span>
+    </div>
+
+    <ng-container *ngIf="productosFiltrados.length > 0; else vacioTpl">
+
+      <ion-grid fixed>
+        <ion-row>
+          <ion-col
+            size="12"
+            size-sm="6"
+            size-md="4"
+            *ngFor="let p of productosFiltrados">
+
+            <ion-card class="producto-card" button (click)="verDetalle(p)">
+
+              <div class="imagen-wrapper">
+                <ion-img
+                  [src]="p.imagen"
+                  [alt]="p.titulo"
+                  loading="lazy">
+                </ion-img>
+                <span class="badge-cat">{{ p.categoria }}</span>
+              </div>
+
+              <ion-card-header>
+                <ion-card-title class="titulo-corto">{{ p.titulo }}</ion-card-title>
+                <ion-card-subtitle>{{ formatearPrecio(p.precio) }}</ion-card-subtitle>
+              </ion-card-header>
+
+              <ion-card-content>
+                <p class="descripcion">{{ p.descripcion }}</p>
+              </ion-card-content>
+
+              <ion-button
+                fill="clear"
+                color="primary"
+                size="small"
+                (click)="verDetalle(p); $event.stopPropagation()">
+                Ver detalle
+                <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+              </ion-button>
+
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+    </ng-container>
+
+    <ng-template #vacioTpl>
+      <div class="estado-vacio">
+        <ion-icon name="paw-outline" size="large"></ion-icon>
+        <h2>Sin productos disponibles</h2>
+        <p>No pudimos obtener el catálogo. Vuelve a intentarlo más tarde.</p>
+      </div>
+    </ng-template>
+
+  </ng-container>
+
+  <ng-template #cargandoTpl>
+    <div class="estado-cargando">
+      <ion-spinner name="circles"></ion-spinner>
+      <p>Cargando catálogo de mascotas...</p>
+    </div>
+  </ng-template>
+
+</ion-content>

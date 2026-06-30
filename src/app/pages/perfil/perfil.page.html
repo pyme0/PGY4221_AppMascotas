@@ -1,0 +1,129 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mi Perfil</ion-title>
+  </ion-toolbar>
+
+  <ion-toolbar color="primary">
+    <ion-segment
+      [(ngModel)]="segmento"
+      (ionChange)="cambiarSegmento($any($event).detail.value)">
+      <ion-segment-button value="datos">
+        <ion-icon name="person-circle-outline"></ion-icon>
+        <ion-label>Datos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="camara">
+        <ion-icon name="camera-outline"></ion-icon>
+        <ion-label>Foto</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+
+  <!-- ===== Segmento: Datos ===== -->
+  <div *ngIf="segmento === 'datos'" class="segmento-panel">
+
+    <div class="perfil-header">
+      <div class="avatar">
+        <ion-icon name="person" size="large"></ion-icon>
+      </div>
+      <div>
+        <h2>{{ nombreUsuario }}</h2>
+        <p>Cliente Tienda de Mascotas</p>
+      </div>
+    </div>
+
+    <form class="perfil-form" (ngSubmit)="guardarDatos()" #perfilForm="ngForm">
+
+      <ion-item lines="round" class="ion-margin-bottom">
+        <ion-label position="floating">Teléfono</ion-label>
+        <ion-input
+          [(ngModel)]="telefono"
+          name="telefono"
+          type="tel"
+          required
+          minlength="6">
+        </ion-input>
+      </ion-item>
+
+      <ion-item lines="round" class="ion-margin-bottom">
+        <ion-label position="floating">Dirección</ion-label>
+        <ion-input
+          [(ngModel)]="direccion"
+          name="direccion"
+          required>
+        </ion-input>
+      </ion-item>
+
+      <ion-item lines="round" class="ion-margin-bottom">
+        <ion-label position="floating">Preferencias</ion-label>
+        <ion-input
+          [(ngModel)]="preferencias"
+          name="preferencias"
+          required>
+        </ion-input>
+      </ion-item>
+
+      <p *ngIf="mensajeGuardado" class="mensaje-guardado">{{ mensajeGuardado }}</p>
+
+      <ion-button
+        expand="block"
+        color="primary"
+        class="ion-margin-top"
+        type="submit"
+        [disabled]="perfilForm.invalid">
+        <ion-icon name="save-outline" slot="start"></ion-icon>
+        Guardar datos
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        color="medium"
+        fill="outline"
+        type="button"
+        (click)="cerrarSesion()">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        Cerrar sesión
+      </ion-button>
+
+    </form>
+
+  </div>
+
+  <!-- ===== Segmento: Cámara ===== -->
+  <div *ngIf="segmento === 'camara'" class="segmento-panel">
+
+    <div class="camara-card">
+
+      <h2>Foto de perfil</h2>
+      <p>Toma una foto para tu cuenta. La imagen queda guardada en el dispositivo.</p>
+
+      <div class="preview">
+        <img *ngIf="fotoPreview; else sinFoto" [src]="fotoPreview" alt="Foto de perfil" />
+        <ng-template #sinFoto>
+          <div class="sin-foto">
+            <ion-icon name="camera" size="large"></ion-icon>
+            <span>Sin foto aún</span>
+          </div>
+        </ng-template>
+      </div>
+
+      <p *ngIf="mensajeFoto" class="mensaje-foto">{{ mensajeFoto }}</p>
+
+      <ion-button
+        expand="block"
+        color="primary"
+        (click)="tomarFoto()">
+        <ion-icon name="camera" slot="start"></ion-icon>
+        {{ fotoPreview ? 'Cambiar foto' : 'Tomar foto' }}
+      </ion-button>
+
+    </div>
+
+  </div>
+
+</ion-content>

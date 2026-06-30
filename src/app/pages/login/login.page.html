@@ -1,0 +1,75 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title class="ion-text-center">
+      🐾 Tienda de Mascotas
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding login-content">
+
+  <div class="logo-container">
+    <div class="logo-circle">
+      <ion-icon name="paw" size="large"></ion-icon>
+    </div>
+    <h1>Bienvenido</h1>
+    <p class="subtitulo">Ingresa tus credenciales para continuar</p>
+  </div>
+
+  <form (ngSubmit)="ingresarConStorage()" class="login-form" #loginForm="ngForm">
+    <ion-item lines="round" class="ion-margin-bottom">
+      <ion-label position="floating">Usuario</ion-label>
+      <ion-input
+        [(ngModel)]="nombre"
+        name="nombre"
+        autocomplete="username"
+        required
+        minlength="3">
+      </ion-input>
+    </ion-item>
+
+    <ion-item lines="round" class="ion-margin-bottom">
+      <ion-label position="floating">Contraseña</ion-label>
+      <ion-input
+        [(ngModel)]="password"
+        name="password"
+        type="password"
+        autocomplete="current-password"
+        required>
+      </ion-input>
+    </ion-item>
+
+    <p *ngIf="errorLogin" class="mensaje-error">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      {{ errorLogin }}
+    </p>
+
+    <ion-button
+      expand="block"
+      type="submit"
+      color="primary"
+      class="ion-margin-top"
+      [disabled]="loginForm.invalid">
+      <ion-icon name="server-outline" slot="start"></ion-icon>
+      Ingresar con Storage
+    </ion-button>
+
+    <ion-button
+      expand="block"
+      type="button"
+      color="secondary"
+      fill="outline"
+      [disabled]="loginForm.invalid"
+      (click)="ingresarConSQLite()">
+      <ion-icon name="cube-outline" slot="start"></ion-icon>
+      Ingresar con SQLite
+    </ion-button>
+
+    <div class="ayuda">
+      <p><strong>Usuarios de prueba:</strong></p>
+      <code>admin / 1234</code> &nbsp; · &nbsp;
+      <code>test / 1234</code>
+    </div>
+  </form>
+
+</ion-content>

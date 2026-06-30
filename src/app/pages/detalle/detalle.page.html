@@ -1,0 +1,71 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalle</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" *ngIf="!cargando; else cargandoTpl">
+
+  <ng-container *ngIf="producto; else noEncontrado">
+
+    <div class="imagen-principal">
+      <ion-img [src]="producto.imagen" [alt]="producto.titulo"></ion-img>
+    </div>
+
+    <div class="detalle-card">
+
+      <span class="badge-cat">{{ producto.categoria }}</span>
+
+      <h1>{{ producto.titulo }}</h1>
+
+      <p class="precio">{{ formatearPrecio(producto.precio) }}</p>
+
+      <p class="descripcion">{{ producto.descripcion }}</p>
+
+      <div class="ficha">
+        <div class="ficha-item">
+          <span class="label">ID</span>
+          <span class="valor">#{{ producto.id }}</span>
+        </div>
+        <div class="ficha-item">
+          <span class="label">Categoría</span>
+          <span class="valor">{{ producto.categoria }}</span>
+        </div>
+        <div class="ficha-item">
+          <span class="label">Disponibilidad</span>
+          <span class="valor disp">En Stock</span>
+        </div>
+      </div>
+
+      <ion-button
+        expand="block"
+        color="primary"
+        class="ion-margin-top"
+        (click)="volver()">
+        <ion-icon name="arrow-back" slot="start"></ion-icon>
+        Volver al catálogo
+      </ion-button>
+    </div>
+
+  </ng-container>
+
+  <ng-template #noEncontrado>
+    <div class="estado-vacio">
+      <ion-icon name="sad-outline" size="large"></ion-icon>
+      <h2>Producto no encontrado</h2>
+      <p>Es posible que el catálogo haya sido actualizado.</p>
+      <ion-button fill="outline" (click)="volver()">Volver</ion-button>
+    </div>
+  </ng-template>
+
+</ion-content>
+
+<ng-template #cargandoTpl>
+  <div class="estado-cargando">
+    <ion-spinner name="circles"></ion-spinner>
+    <p>Cargando producto...</p>
+  </div>
+</ng-template>
